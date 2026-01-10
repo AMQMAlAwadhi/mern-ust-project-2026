@@ -32,10 +32,8 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
-app.use(cors({
-  origin: ['https://mern-ust-project-2026-2.onrender.com/', 'http://localhost:3000'],
-  credentials: true
-}));
+// In backend/server.js
+app.use(cors()); // This allows all domains (only do this to test!)
 app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
