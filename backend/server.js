@@ -2,7 +2,8 @@ import path from 'path';
 import express from 'express';
 import dotenv from 'dotenv';
 import cookieParser from 'cookie-parser';
-import cors from 'cors'; // 1. ADD THIS
+import cors from 'cors'; 
+
 dotenv.config();
 import connectDB from './config/db.js';
 import productRoutes from './routes/productRoutes.js';
@@ -17,11 +18,27 @@ connectDB();
 
 const app = express();
 
-// 2. ADD CORS MIDDLEWARE HERE (Before routes)
+// --- FIXED CORS SECTION ---
+// We use an array to allow both of your Render frontend URLs.
+// This MUST come before your routes.
+const allowedOrigins = [
+  'https://mern-ust-project-2026-1.onrender.com',
+  'https://mern-ust-project-2026-2.onrender.com'
+];
+
 app.use(cors({
-  origin: 'https://mern-ust-project-2026-1.onrender.com', // Your Frontend URL
+  origin: function (origin, callback) {
+    // Allow requests with no origin (like mobile apps or curl requests)
+    if (!origin) return callback(null, true);
+    if (allowedOrigins.indexOf(origin) === -1) {
+      const msg = 'The CORS policy for this site does not allow access from the specified Origin.';
+      return callback(new Error(msg), false);
+    }
+    return callback(null, true);
+  },
   credentials: true
 }));
+// --------------------------
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -32,29 +49,22 @@ app.use('/api/products', productRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/orders', orderRoutes);
 app.use('/api/upload', uploadRoutes);
-// In backend/server.js
-app.use(cors()); // This allows all domains (only do this to test!)
+
 app.get('/api/config/paypal', (req, res) =>
   res.send({ clientId: process.env.PAYPAL_CLIENT_ID })
 );
 
-// 3. UPDATED PRODUCTION BLOCK
 const __dirname = path.resolve();
 app.use('/uploads', express.static(path.join(__dirname, '/uploads')));
 
-if (process.env.NODE_ENV === 'production') {
-  app.get('/', (req, res) => {
-    res.send('API is running....');
-  });
-} else {
-  app.get('/', (req, res) => {
-    res.send('API is running....');
-  });
-}
+// Simple check for both Production and Dev
+app.get('/', (req, res) => {
+  res.send('API is running....');
+});
 
 app.use(notFound);
 app.use(errorHandler);
 
 app.listen(port, () =>
-  console.log(`Server running in ${process.env.NODE_ENV} mode on port ${port}`)
+  console.log(`Server running on port ${port}`)
 );
