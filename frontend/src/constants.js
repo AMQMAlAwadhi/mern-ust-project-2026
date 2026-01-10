@@ -1,6 +1,4 @@
-// This tells React: Use the Render variable if it exists, otherwise use localhost
 export const BASE_URL = process.env.REACT_APP_API_URL || ''; 
-
 export const PRODUCTS_URL = `${BASE_URL}/api/products`;
 export const USERS_URL = `${BASE_URL}/api/users`;
 export const ORDERS_URL = `${BASE_URL}/api/orders`;
